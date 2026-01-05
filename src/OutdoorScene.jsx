@@ -68,7 +68,7 @@ const OutdoorScene = ({ onEnterHouse }) => {
           className="interactive-hotspot door-zone" 
           onClick={!showBunnyDialog ? onEnterHouse : undefined}
         >
-          {!showBunnyDialog && <div className="tooltip">ENTER</div>}
+          {!showBunnyDialog && <div className="tooltip">主页</div>}
         </div>
 
         {/* --- 交互热区 2: 小兔子 (新增!) --- */}
@@ -116,7 +116,7 @@ const OutdoorScene = ({ onEnterHouse }) => {
         //.interactive-hotspot:hover { background-color: rgba(255, 255, 255, 0.15); }
 
         /* --- 门的位置 (沿用你之前的设置) --- */
-        .door-zone { top: 50%; left: 45%; width: 10%; height: 20%; }
+        .door-zone { top: 15.5%; left: 41%; width: 10%; height: 20%; }
 
         /* --- 小兔子的位置 (需要你手动微调!) --- */
         .bunny-zone {
