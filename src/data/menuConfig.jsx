@@ -68,3 +68,6 @@ export const getMenuItems = (setScene) => [
     action: () => setScene('outdoor')
   }
 ];
+
+
+

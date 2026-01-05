@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import OutdoorScene from './OutdoorScene';
-import IndoorRoom from './IndoorRoom'; // 引入新拆分的组件
+import IndoorRoom from './IndoorRoom';
 
 function App() {
-  const [scene, setScene] = useState('outdoor');
+  // ✨✨✨ 修改点：初始状态改为 'indoor'，直接进入房间 ✨✨✨
+  const [scene, setScene] = useState('indoor'); 
   const [isTransitioning, setIsTransitioning] = useState(false);
 
-  // 进入室内的转场逻辑
+  // 虽然现在直接进屋了，但这个函数留着也无妨，万一以后你想加回“出门”功能呢
   const handleEnterHouse = () => {
     setIsTransitioning(true);
     setTimeout(() => {
@@ -17,15 +18,12 @@ function App() {
 
   return (
     <>
-      {/* 场景渲染器 */}
       {scene === 'outdoor' ? (
         <OutdoorScene onEnterHouse={handleEnterHouse} />
       ) : (
-        // 把 setScene 传进去，让 IndoorRoom 内部可以调用 setScene('outdoor') 来出门
         <IndoorRoom setScene={setScene} />
       )}
       
-      {/* 全局转场黑屏层 */}
       <div style={{
         position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
         backgroundColor: 'black', pointerEvents: 'none',

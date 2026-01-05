@@ -1,138 +1,219 @@
-import React, { useState, useRef } from 'react';
-import PixelModal from './PixelModal';
+import React, { useState } from 'react';
 import DialogBox from './DialogBox';
+import PixelFireplace from './PixelFireplace';
+import PixelTV from './PixelTV'; 
 import kkAvatarImg from './assets/kk对话框头像.png';
-import { getMenuItems } from './data/menuConfig'; // 引入配置
+import gfAvatarImg from './assets/km.png'; 
+import babyImg from './assets/kaka.png';
+import bunnyImg from './assets/小兔子.png';
 
 const IndoorRoom = ({ setScene }) => {
-  const [dialogText, setDialogText] = useState("欢迎来到我的个人主页！请在右侧选择你要浏览的内容。");
-  const [activeModal, setActiveModal] = useState(null);
-  const hoverTimer = useRef(null);
+  const [activeItem, setActiveItem] = useState(null);
+  const [dialogText, setDialogText] = useState("外面冰天雪地，还是屋里暖和。想看点什么？");
 
-  // 获取菜单项配置
-  // 这里我们手动处理一下 'about' 的内容，因为它依赖本地图片
-  const rawMenuItems = getMenuItems(setScene);
-  const menuItems = rawMenuItems.map(item => {
-    if (item.isAbout) {
-      return {
-        ...item,
-        content: (
-          <div style={{ display: 'flex', gap: 20 }}>
-            <img src={kkAvatarImg} style={{ width: 64, height: 64, border: '2px solid #5d3a24' }} alt="KK" />
-            <div>
-              <p>你好！我是 KK。</p>
-              <p>Email: kkipaper@163.com</p>
-            </div>
-          </div>
-        )
-      };
+  const Rug = () => (
+    <div style={{
+      width: '700px', height: '140px', background: '#5d4037',
+      borderRadius: '50%', border: '4px solid #3e2723',
+      position: 'absolute', bottom: '10px', left: '50%', transform: 'translateX(-50%)',
+      zIndex: 0, boxShadow: '0 5px 0 rgba(0,0,0,0.3)'
+    }}></div>
+  );
+
+  const relationships = [
+    { id: 1, name: "世界上最好的km", role: "💖 Lover", desc: "值得一生守护的最可爱的小宝。", hearts: 10, avatar: gfAvatarImg },
+    { id: 2, name: "kaka", role: "👶🏻 Daughter", desc: "kk和km的小宝宝，爱情的结晶", hearts: 10, avatar: babyImg },
+    { id: 3, name: "雪地兔", role: "🐰 宠物", desc: "门口那只话很多的小兔子。", hearts: 3, avatar: bunnyImg },
+  ];
+
+  const menuItems = [
+    {
+      id: 'blog', label: '📚 博客文章', desc: '看看我最近写了什么技术笔记。',
+      content: (
+        <div className="content-inner">
+          <h2 style={{borderBottom: '2px solid #5d3a24', paddingBottom: 10, marginBottom: 15}}>最近更新</h2>
+          <ul className="pixel-ul" style={{fontSize: '1.5rem', lineHeight: '1.8'}}>
+            <li><span>2026.01</span>React 像素风开发实战</li>
+            <li><span>2025.12</span>数据分析师的转型之路</li>
+            <li><span>2025.11</span>Islands 架构解析</li>
+            <li><span>2025.10</span>如何用 CSS 画一个壁炉？</li>
+          </ul>
+        </div>
+      )
+    },
+    {
+      id: 'projects', label: '💻 项目展示', desc: '回顾一下我的代码仓库和作品。',
+      content: (
+        <div className="content-inner">
+           <h2 style={{borderBottom: '2px solid #5d3a24', paddingBottom: 10, marginBottom: 15}}>我的作品</h2>
+           <div className="project-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20}}>
+             <div className="project-item"><strong>Pixel Farm</strong><p>基于 React 的星露谷风格个人主页。</p></div>
+             <div className="project-item"><strong>SST Model</strong><p>海温预测深度学习模型。</p></div>
+             <div className="project-item"><strong>Data Viz</strong><p>大屏数据可视化系统。</p></div>
+           </div>
+        </div>
+      )
+    },
+    {
+      id: 'social', label: '♥ 社交关系', desc: '我想看看我的家人们。',
+      content: (
+        <div className="content-inner">
+           <h2 style={{borderBottom: '2px solid #5d3a24', paddingBottom: 10, marginBottom: 15}}>Family & Friends</h2>
+           <div className="social-list-large">
+             {relationships.map(friend => (
+               <div key={friend.id} className={`friend-card-large ${friend.id === 1 ? 'special' : ''}`}>
+                 <div className="avatar-section">
+                    <img src={friend.avatar} alt={friend.name} onError={(e) => e.target.src='https://api.dicebear.com/9.x/pixel-art/svg?seed=Error'} />
+                 </div>
+                 <div className="info-section">
+                   <div className="card-header">
+                     <span className="name">{friend.name}</span>
+                     <span className="role-badge">{friend.role}</span>
+                   </div>
+                   <div className="hearts-row">
+                     {Array.from({ length: friend.hearts }).map((_, i) => <span key={i}>❤️</span>)}
+                   </div>
+                   <p className="description-text">{friend.desc}</p>
+                 </div>
+               </div>
+             ))}
+           </div>
+        </div>
+      )
+    },
+    // ✨✨✨ 修改点：disabled: true，且修改了描述 ✨✨✨
+    { 
+      id: 'exit', 
+      label: '🚪 离开房间', 
+      desc: '门好像被大雪封住了，暂时出不去。', 
+      action: () => {}, // 空函数
+      disabled: true    // 新增禁用标记
     }
-    return item;
-  });
+  ];
 
-  // === 交互逻辑 ===
   const handleMouseEnter = (item) => {
+    // 即使是禁用的按钮，鼠标放上去也可以显示提示（告诉用户为什么不能点）
     setDialogText(item.desc);
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
-
-    if (!item.action) {
-      hoverTimer.current = setTimeout(() => {
-        console.log(`⏳ 悬停3秒达成，自动展开：${item.label}`);
-        setActiveModal(item.id);
-      }, 3000);
-    }
   };
-
-  const handleMouseLeave = () => {
-    setDialogText("请在右侧选择你要浏览的内容。");
-    if (hoverTimer.current) {
-      clearTimeout(hoverTimer.current);
-      hoverTimer.current = null;
-    }
-  };
-
+  
+  const handleMouseLeave = () => { if (!activeItem) setDialogText("外面冰天雪地，还是屋里暖和。想看点什么？"); };
+  
   const handleClick = (item) => {
-    if (hoverTimer.current) clearTimeout(hoverTimer.current);
+    // ✨ 如果是禁用的，直接返回，不做任何反应
+    if (item.disabled) return;
+
     if (item.action) {
       item.action();
     } else {
-      setActiveModal(item.id);
+      setActiveItem(item.id);
+      setDialogText(`正在电视上播放：${item.label}`);
     }
   };
 
   return (
     <div className="menu-wrapper">
-      <div className="rpg-menu-container">
-        
-        {/* 左侧：个人信息卡片 */}
-        <div className="profile-card">
-          <div className="avatar-frame"><img src={kkAvatarImg} alt="KK" /></div>
-          <h2>KK大王</h2>
-          <div className="status-bar"><span>LV.25</span><span>数据法师</span></div>
-          <div className="divider"></div>
-          <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>"ai让脑海中的奇思妙想成为可能"</p>
-        </div>
+      <div className="room-lighting-overlay"></div>
 
-        {/* 右侧：菜单列表 */}
-        <div className="menu-list">
+      <div className="side-menu-hud">
+        <div className="menu-header">遥控器</div>
+        <div className="btn-group">
           {menuItems.map((item) => (
             <button
               key={item.id}
-              className={`pixel-btn ${item.id === 'social' ? 'special-btn' : ''}`}
+              // ✨ 添加 disabled 样式类
+              className={`pixel-btn ${activeItem === item.id ? 'active' : ''} ${item.disabled ? 'disabled-btn' : ''}`}
               onMouseEnter={() => handleMouseEnter(item)}
               onMouseLeave={handleMouseLeave}
               onClick={() => handleClick(item)}
+              // ✨ 原生禁用属性
+              disabled={item.disabled}
             >
-              <span className="loading-bar"></span>
               {item.label}
+              {/* 禁用的按钮显示一个小锁图标 */}
+              {item.disabled && <span style={{float:'right'}}>🔒</span>}
             </button>
           ))}
         </div>
       </div>
 
-      {/* 底部对话框 */}
+      <div className="center-stage">
+          <div className="tv-area">
+              <PixelTV 
+                  content={menuItems.find(i => i.id === activeItem)?.content}
+                  isActive={!!activeItem}
+              />
+          </div>
+          <div className="hearth-area">
+              <Rug />
+              <div className="big-fireplace"><PixelFireplace /></div>
+              <div className="kk-sitting">
+                  <img src={kkAvatarImg} alt="KK" className="kk-sprite" />
+                  <div className="npc-bubble">Zzz...</div>
+              </div>
+          </div>
+      </div>
+
       <div className="fixed-dialog">
         <DialogBox name="KK大王" text={dialogText} onNext={() => {}} isLast={true} customAvatar={kkAvatarImg} />
       </div>
 
-      {/* 弹窗 */}
-      {activeModal && (
-        <PixelModal 
-          title={menuItems.find(i => i.id === activeModal)?.label} 
-          onClose={() => setActiveModal(null)}
-        >
-          {menuItems.find(i => i.id === activeModal)?.content}
-        </PixelModal>
-      )}
-
-      {/* 样式 (Style) */}
       <style>{`
-        .menu-wrapper { width: 100vw; height: 100vh; background-color: #261a14; background-image: repeating-linear-gradient(45deg, #2e2018 25%, transparent 25%, transparent 75%, #2e2018 75%, #2e2018), repeating-linear-gradient(45deg, #2e2018 25%, #261a14 25%, #261a14 75%, #2e2018 75%, #2e2018); background-position: 0 0, 10px 10px; background-size: 20px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'VT323', monospace; }
-        .rpg-menu-container { display: flex; gap: 40px; margin-bottom: 140px; align-items: center; }
-        .profile-card { width: 200px; padding: 20px; background: #eac285; border: 4px solid #5d3a24; box-shadow: 8px 8px 0 rgba(0,0,0,0.5); text-align: center; color: #3e2723; image-rendering: pixelated; }
-        .avatar-frame { width: 100px; height: 100px; margin: 0 auto 10px; background: #d4a373; border: 4px solid #5d3a24; }
-        .avatar-frame img { width: 100%; height: 100%; object-fit: cover; }
-        .divider { height: 2px; background: #8b5a2b; margin: 10px 0; }
-        .status-bar { display: flex; justify-content: space-between; font-weight: bold; color: #8b0000; margin-bottom: 10px; }
-        .menu-list { display: flex; flex-direction: column; gap: 20px; }
-        .pixel-btn { width: 300px; padding: 15px 20px; font-family: 'VT323', monospace; font-size: 1.5rem; text-align: left; background: #d4a373; color: #3e2723; border: 4px solid #5d3a24; box-shadow: 4px 4px 0 rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s; position: relative; }
-        .pixel-btn:hover { background: #eac285; transform: translateX(10px); }
-        .pixel-btn:hover::before { content: '►'; position: absolute; left: -25px; color: #eac285; }
-        .fixed-dialog { position: fixed; bottom: 40px; width: 100%; max-width: 800px; z-index: 50; }
+        /* 保持之前的样式 ... */
+        .menu-wrapper { width: 100vw; height: 100vh; background-color: #2e2018; background-image: linear-gradient(335deg, rgba(0,0,0,0.1) 23px, transparent 23px), linear-gradient(155deg, rgba(0,0,0,0.1) 23px, transparent 23px), linear-gradient(335deg, rgba(0,0,0,0.1) 23px, transparent 23px), linear-gradient(155deg, rgba(0,0,0,0.1) 23px, transparent 23px); background-size: 58px 58px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'VT323', monospace; overflow: hidden; position: relative; }
+        .room-lighting-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; background: radial-gradient(circle at 50% 80%, rgba(255, 100, 50, 0.15), transparent 60%); mix-blend-mode: hard-light; z-index: 5; animation: room-flicker 4s infinite alternate; }
+        @keyframes room-flicker { 0% { opacity: 0.8; } 100% { opacity: 0.95; } }
 
-        /* 社交列表样式 */
-        .special-btn:hover { background: #ffccdd; color: #880044; }
-        .special-btn:hover::before { color: #ffccdd; }
-        .social-list { display: flex; flex-direction: column; gap: 15px; }
-        .friend-card { display: flex; gap: 15px; background: rgba(255,255,255,0.3); padding: 10px; border: 2px solid #c48c5e; border-radius: 4px; align-items: center; }
-        .friend-avatar { width: 64px; height: 64px; border: 2px solid #5d3a24; background: #d4a373; flex-shrink: 0; }
-        .friend-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .friend-info { flex: 1; }
-        .friend-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-        .friend-name { font-size: 1.4rem; font-weight: bold; color: #5d3a24; }
-        .friend-role { font-size: 1rem; color: #8b0000; background: rgba(255,255,255,0.5); padding: 0 4px; border-radius: 4px; }
-        .friend-desc { font-size: 1rem; margin: 0; opacity: 0.9; margin-bottom: 6px; }
-        .heart-bar { font-size: 0.8rem; letter-spacing: 2px; }
+        .side-menu-hud { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 20px; z-index: 20; }
+        .menu-header { color: #eac285; font-size: 1.5rem; text-align: center; text-shadow: 2px 2px #000; letter-spacing: 2px; }
+        .btn-group { display: flex; flex-direction: column; gap: 15px; }
+
+        /* 正常按钮样式 */
+        .pixel-btn { width: 220px; padding: 15px; font-size: 1.2rem; background: #d4a373; border: 4px solid #5d3a24; color: #3e2723; cursor: pointer; transition: transform 0.1s; box-shadow: 4px 4px 0 rgba(0,0,0,0.4); font-family: inherit; }
+        .pixel-btn:hover { background: #eac285; transform: scale(1.05); }
+        .pixel-btn.active { background: #fff8e1; border-color: #ff9800; transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.4); }
+
+        /* ✨✨✨ 新增：禁用按钮样式 ✨✨✨ */
+        .pixel-btn.disabled-btn {
+            background: #8d6e63; /* 变灰/变暗 */
+            color: #5d4037;
+            cursor: not-allowed;
+            border-color: #5d4037;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+        /* 禁用时 hover 不变色，不动 */
+        .pixel-btn.disabled-btn:hover {
+            background: #8d6e63;
+            transform: none;
+        }
+
+        .center-stage { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 10; margin-bottom: 120px; transform: scale(0.85); }
+        @media (min-height: 900px) { .center-stage { transform: scale(1); } }
+        .tv-area { position: relative; z-index: 10; margin-bottom: -20px; }
+        .hearth-area { position: relative; width: 100%; display: flex; justify-content: center; align-items: flex-end; height: 160px; }
+        .big-fireplace { transform: scale(1.6); transform-origin: bottom center; z-index: 2; }
+        .kk-sitting { position: absolute; right: -120px; bottom: 10px; z-index: 3; animation: breathe 3s infinite ease-in-out; }
+        .kk-sprite { width: 70px; height: 70px; border: 3px solid #3e2723; background: #d4a373; object-fit: cover; image-rendering: pixelated; }
+        @keyframes breathe { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+        .npc-bubble { position: absolute; top: -20px; right: -10px; background: white; padding: 2px 6px; border-radius: 8px; font-size: 0.8rem; animation: float 2s infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        .pixel-ul span { background: #eac285; padding: 2px 6px; margin-right: 10px; border-radius: 4px; }
+        .project-item { background: rgba(0,0,0,0.05); padding: 10px; border: 2px dashed #8b5a2b; margin-bottom: 10px; }
+        .project-item p { margin: 4px 0 0 0; font-size: 0.9rem;}
+        .project-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .social-list-large { display: flex; flex-direction: column; gap: 15px; }
+        .friend-card-large { display: flex; gap: 20px; background: #fff8e1; border: 3px solid #5d3a24; padding: 15px; box-shadow: 4px 4px 0 rgba(0,0,0,0.1); align-items: flex-start; }
+        .friend-card-large.special { background: #fff0f5; border-color: #ff80ab; }
+        .avatar-section img { width: 80px; height: 80px; object-fit: cover; border: 4px solid #5d3a24; background: #d4a373; }
+        .info-section { flex: 1; }
+        .card-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 5px; border-bottom: 2px dashed rgba(0,0,0,0.1); padding-bottom: 5px; }
+        .info-section .name { font-size: 1.6rem; font-weight: bold; color: #3e2723; }
+        .role-badge { background: #eac285; color: #5d3a24; padding: 2px 6px; border-radius: 4px; font-size: 0.9rem; font-weight: bold; }
+        .hearts-row { font-size: 0.8rem; letter-spacing: -1px; margin-bottom: 8px; }
+        .description-text { font-size: 1.1rem; color: #5d4037; margin: 0; line-height: 1.4; font-family: 'VT323', monospace; }
+
+        .fixed-dialog { position: fixed; bottom: 20px; width: 90%; max-width: 800px; z-index: 50; left: 50%; transform: translateX(-50%); }
       `}</style>
     </div>
   );
